@@ -27,6 +27,10 @@ public class HttpInfluxdbProtocol implements InfluxdbProtocol {
                 throw new IllegalArgumentException("time precision should be SECONDS or MILLISECONDS or MICROSECONDS");
         }
     }
+
+    public HttpInfluxdbProtocol(String host, int port, String user, String password, String db) {
+        this(host, port, user, password, db, DEFAULT_TIME_PRECISION);
+    }
     
     public HttpInfluxdbProtocol(String host, int port, String user, String password, String db, TimeUnit precision) {
         super();

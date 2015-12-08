@@ -1,5 +1,7 @@
 package metrics_influxdb.api.protocols;
 
+import java.util.concurrent.TimeUnit;
+
 public class InfluxdbProtocols {
 	public static InfluxdbProtocol udp(String host, int port) {
 		return new UDPInfluxdbProtocol(host, port);

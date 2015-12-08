@@ -19,11 +19,16 @@ import metrics_influxdb.SkipIdleReporter;
 import metrics_influxdb.api.measurements.MetricMeasurementTransformer;
 
 public class MeasurementReporter extends SkipIdleReporter {
+    private final static TimeUnit DEFAULT_TIME_PRECISION = TimeUnit.MILLISECONDS;
     private final Sender sender;
     private final Clock clock;
     private Map<String, String> baseTags;
     private MetricMeasurementTransformer transformer;
     private TimeUnit timePrecision;
+
+    public MeasurementReporter(Sender sender, MetricRegistry registry, MetricFilter filter, TimeUnit rateUnit, TimeUnit durationUnit, boolean skipIdleMetrics, Clock clock, Map<String, String> baseTags, MetricMeasurementTransformer transformer) {
+        this(sender, registry, filter, rateUnit, durationUnit, skipIdleMetrics, clock, baseTags, transformer, DEFAULT_TIME_PRECISION);
+    }
 
     public MeasurementReporter(Sender sender, MetricRegistry registry, MetricFilter filter, TimeUnit rateUnit, TimeUnit durationUnit, boolean skipIdleMetrics, Clock clock, Map<String, String> baseTags, MetricMeasurementTransformer transformer, TimeUnit precision) {
         super(registry, "measurement-reporter", filter, rateUnit, durationUnit, skipIdleMetrics);
