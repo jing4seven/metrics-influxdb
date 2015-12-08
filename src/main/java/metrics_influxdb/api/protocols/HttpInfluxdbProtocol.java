@@ -1,17 +1,34 @@
 package metrics_influxdb.api.protocols;
 
+import java.util.concurrent.TimeUnit;
+
 public class HttpInfluxdbProtocol implements InfluxdbProtocol {
     public final static String DEFAULT_HOST = "127.0.0.1";
     public final static int DEFAULT_PORT = 8086;
     public final static String DEFAULT_DATABASE = "metrics";
+    public final static TimeUnit DEFAULT_TIME_PRECISION = TimeUnit.MILLISECONDS;
     private final String user;
     private final String password;
     private final String host; 
     private final int port;
     private final boolean secured;
     private final String database;
+    private final String timePrecision;
+
+    public static String toTimePrecision(TimeUnit t) {
+        switch (t) {
+            case SECONDS:
+                return "s";
+            case MILLISECONDS:
+                return "ms";
+            case MICROSECONDS:
+                return "u";
+            default:
+                throw new IllegalArgumentException("time precision should be SECONDS or MILLISECONDS or MICROSECONDS");
+        }
+    }
     
-    public HttpInfluxdbProtocol(String host, int port, String user, String password, String db) {
+    public HttpInfluxdbProtocol(String host, int port, String user, String password, String db, TimeUnit precision) {
         super();
         this.host = host;
         this.port = port;
@@ -19,6 +36,7 @@ public class HttpInfluxdbProtocol implements InfluxdbProtocol {
         this.password = password;
         this.database = db;
         this.secured = (user != null) && (password != null);
+        this.timePrecision = toTimePrecision(precision);
     }
     
     public HttpInfluxdbProtocol(String host) {
@@ -30,7 +48,7 @@ public class HttpInfluxdbProtocol implements InfluxdbProtocol {
     }
     
     public HttpInfluxdbProtocol(String host, int port, String database) {
-        this(host, port, null, null, database);
+        this(host, port, null, null, database, DEFAULT_TIME_PRECISION);
     }
     
     public HttpInfluxdbProtocol() {
@@ -38,7 +56,7 @@ public class HttpInfluxdbProtocol implements InfluxdbProtocol {
     }
     
     public HttpInfluxdbProtocol(String host, int port, String user, String password) {
-        this(host, port, user, password, DEFAULT_DATABASE);
+        this(host, port, user, password, DEFAULT_DATABASE, DEFAULT_TIME_PRECISION);
     }
     
     public String getUser() {
@@ -59,5 +77,9 @@ public class HttpInfluxdbProtocol implements InfluxdbProtocol {
 
     public String getDatabase() {
         return database;
+    }
+
+    public String getTimePrecision() {
+        return timePrecision;
     }
 }

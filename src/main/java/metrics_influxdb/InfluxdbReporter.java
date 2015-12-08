@@ -100,6 +100,7 @@ public class InfluxdbReporter extends SkipIdleReporter {
 		private TimeUnit durationUnit;
 		private MetricFilter filter;
 		private boolean skipIdleMetrics;
+		private TimeUnit timePrecision;
 		
         @VisibilityIncreasedForTests InfluxDBCompatibilityVersions influxdbVersion;
         @VisibilityIncreasedForTests InfluxdbProtocol protocol;
@@ -222,7 +223,7 @@ public class InfluxdbReporter extends SkipIdleReporter {
                 } else {
                     throw new IllegalStateException("unsupported protocol: " + protocol);
                 }
-                reporter = new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, skipIdleMetrics, clock, tags, transformer);
+                reporter = new MeasurementReporter(s, registry, filter, rateUnit, durationUnit, skipIdleMetrics, clock, tags, transformer, timePrecision);
             }
             return reporter;
         }
@@ -270,6 +271,16 @@ public class InfluxdbReporter extends SkipIdleReporter {
             Miscellaneous.requireNotEmptyParameter(tagKey, "tag");
             Miscellaneous.requireNotEmptyParameter(tagValue, "value");
 			tags.put(tagKey, tagValue);
+			return this;
+		}
+
+		/**
+		 * Set the time precision when POST data to influxdb.
+		 * @param precision time unit for precision.
+		 */
+		public Builder timePrecision(TimeUnit precision) {
+			Objects.requireNonNull(precision, "given time precision cannot be null");
+			this.timePrecision = precision;
 			return this;
 		}
 	}

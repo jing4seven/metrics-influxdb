@@ -23,13 +23,15 @@ public class MeasurementReporter extends SkipIdleReporter {
     private final Clock clock;
     private Map<String, String> baseTags;
     private MetricMeasurementTransformer transformer;
+    private TimeUnit timePrecision;
 
-    public MeasurementReporter(Sender sender, MetricRegistry registry, MetricFilter filter, TimeUnit rateUnit, TimeUnit durationUnit, boolean skipIdleMetrics, Clock clock, Map<String, String> baseTags, MetricMeasurementTransformer transformer) {
+    public MeasurementReporter(Sender sender, MetricRegistry registry, MetricFilter filter, TimeUnit rateUnit, TimeUnit durationUnit, boolean skipIdleMetrics, Clock clock, Map<String, String> baseTags, MetricMeasurementTransformer transformer, TimeUnit precision) {
         super(registry, "measurement-reporter", filter, rateUnit, durationUnit, skipIdleMetrics);
         this.baseTags = baseTags;
         this.sender = sender;
         this.clock = clock;
         this.transformer = transformer;
+        this.timePrecision = precision;
     }
 
     @SuppressWarnings("rawtypes")
@@ -72,6 +74,7 @@ public class MeasurementReporter extends SkipIdleReporter {
         tags.putAll(transformer.tags(metricName));
 
         Measure measure = new Measure(transformer.measurementName(metricName))
+                .timePrecision(timePrecision)
                 .timestamp(timestamp)
                 .addTag(tags)
                 .addValue("count", snapshot.size())
@@ -98,6 +101,7 @@ public class MeasurementReporter extends SkipIdleReporter {
         tags.putAll(transformer.tags(metricName));
 
         Measure measure = new Measure(transformer.measurementName(metricName))
+                .timePrecision(timePrecision)
                 .timestamp(timestamp)
                 .addTag(tags)
                 .addValue("count", mt.getCount())
@@ -115,6 +119,7 @@ public class MeasurementReporter extends SkipIdleReporter {
         tags.putAll(transformer.tags(metricName));
 
         Measure measure = new Measure(transformer.measurementName(metricName))
+                .timePrecision(timePrecision)
                 .timestamp(timestamp)
                 .addTag(tags)
                 .addValue("count", snapshot.size())
@@ -136,6 +141,7 @@ public class MeasurementReporter extends SkipIdleReporter {
         tags.putAll(transformer.tags(metricName));
 
         Measure measure = new Measure(transformer.measurementName(metricName))
+                .timePrecision(timePrecision)
                 .timestamp(timestamp)
                 .addTag(tags)
                 .addValue("count", c.getCount());
@@ -149,6 +155,7 @@ public class MeasurementReporter extends SkipIdleReporter {
         tags.putAll(transformer.tags(metricName));
 
         Measure measure = new Measure(transformer.measurementName(metricName))
+                .timePrecision(timePrecision)
                 .timestamp(timestamp)
                 .addTag(tags);
         Object o = g.getValue();

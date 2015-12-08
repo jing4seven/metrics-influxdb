@@ -3,27 +3,36 @@ package metrics_influxdb.measurements;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.codahale.metrics.Clock;
 
 import metrics_influxdb.misc.Miscellaneous;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Measure implements Measurement {
+	private final static Logger LOGGER = LoggerFactory.getLogger(Measurement.class);
+
 	private String name;
 	private Map<String, String> tags;
 	private Map<String, String> values;
 	private long timestamp;
+	private TimeUnit timePrecision;
 	
 	public Measure(String name) {
-		this(name, (Map<String, String>)null, (Map<String, String>)null, Clock.defaultClock().getTime());
+		this(name, (Map<String, String>) null, (Map<String, String>) null, Clock.defaultClock().getTime(),
+				TimeUnit.NANOSECONDS);
 	}
 	
-	public Measure(String name, Map<String, String> tags, Map<String, String> values, long timestamp) {
+	public Measure(String name, Map<String, String> tags, Map<String, String> values, long timestamp,
+				   TimeUnit precision) {
 		super();
 		this.name = name;
 		this.tags = new HashMap<String, String>();
 		this.values = new HashMap<String, String>();
 		this.timestamp = timestamp;
+		this.timePrecision = precision;
 		
 		if (tags != null) {
 			this.tags.putAll(tags);
@@ -38,7 +47,7 @@ public class Measure implements Measurement {
 	}
 	
 	public Measure(String name, Map<String, String> tags, long value, long timestamp) {
-		this(name, tags, Collections.singletonMap("value", value+"i"), timestamp);
+		this(name, tags, Collections.singletonMap("value", value + "i"), timestamp, TimeUnit.NANOSECONDS);
 	}
 	
 	public Measure(String name, long value, long timestamp) {
@@ -70,7 +79,7 @@ public class Measure implements Measurement {
 	}
 	
 	public Measure(String name, Map<String, String> tags, double value, long timestamp) {
-		this(name, tags, Collections.singletonMap("value", ""+value), timestamp);
+		this(name, tags, Collections.singletonMap("value", "" + value), timestamp, TimeUnit.NANOSECONDS);
 	}
 	
 	public Measure(String name, double value, long timestamp) {
@@ -102,7 +111,7 @@ public class Measure implements Measurement {
 	}
 	
 	public Measure(String name, Map<String, String> tags, String value, long timestamp) {
-		this(name, tags, Collections.singletonMap("value", asStringValue(value)), timestamp);
+		this(name, tags, Collections.singletonMap("value", asStringValue(value)), timestamp, TimeUnit.NANOSECONDS);
 	}
 	
 	public Measure(String name, String value, long timestamp) {
@@ -118,7 +127,7 @@ public class Measure implements Measurement {
 	}
 	
 	public Measure(String name, Map<String, String> tags, boolean value, long timestamp) {
-		this(name, tags, Collections.singletonMap("value", ""+value), timestamp);
+		this(name, tags, Collections.singletonMap("value", ""+value), timestamp, TimeUnit.NANOSECONDS);
 	}
 	
 	public Measure(String name, boolean value, long timestamp) {
@@ -153,6 +162,11 @@ public class Measure implements Measurement {
 		return timestamp;
 	}
 
+	@Override
+	public TimeUnit getTimePrecision() {
+		return timePrecision;
+	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -174,9 +188,33 @@ public class Measure implements Measurement {
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
+
+	public Measure timePrecision(TimeUnit precision) {
+		if (precision != TimeUnit.SECONDS && precision != TimeUnit.MILLISECONDS || precision != TimeUnit.MICROSECONDS) {
+			LOGGER.error("time precision can be only set to SECONDS, MILLISECONDS or MICROSECONDS");
+		}
+
+		this.timePrecision = precision;
+		return this;
+	}
 	
 	public Measure timestamp(long timestamp) {
-	    setTimestamp(timestamp);
+
+		switch (timePrecision) {
+			case SECONDS:
+				setTimestamp(TimeUnit.SECONDS.convert(timestamp, TimeUnit.MILLISECONDS));
+				break;
+			case MILLISECONDS:
+				setTimestamp(TimeUnit.MILLISECONDS.convert(timestamp, TimeUnit.MILLISECONDS));
+				break;
+			case MICROSECONDS:
+				setTimestamp(TimeUnit.MICROSECONDS.convert(timestamp, TimeUnit.MILLISECONDS));
+				break;
+			default:
+				// Convert milliseconds timestamp to nanoseconds for influxdb version 0.9
+				setTimestamp(TimeUnit.NANOSECONDS.convert(timestamp, TimeUnit.MILLISECONDS));
+		}
+
 	    return this;
 	}
 	
