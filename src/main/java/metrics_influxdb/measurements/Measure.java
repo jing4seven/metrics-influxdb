@@ -190,8 +190,9 @@ public class Measure implements Measurement {
 	}
 
 	public Measure timePrecision(TimeUnit precision) {
-		if (precision != TimeUnit.SECONDS && precision != TimeUnit.MILLISECONDS || precision != TimeUnit.MICROSECONDS) {
+		if (precision != TimeUnit.SECONDS && precision != TimeUnit.MILLISECONDS && precision != TimeUnit.MICROSECONDS) {
 			LOGGER.error("time precision can be only set to SECONDS, MILLISECONDS or MICROSECONDS");
+			return null;
 		}
 
 		this.timePrecision = precision;
